@@ -40,7 +40,7 @@
       data.addColumn('datetime', 'Date');
       data.addColumn('number', 'Dollars');
       
-      $.get('http://jonathanstark.com/card/api/balances',function(result, textStatus, jqXHR) {
+      $.get('balances.php',function(result, textStatus, jqXHR) {
         var balances = result.balances;
         
         balances = _.map(balances, function(transaction) {
@@ -58,7 +58,7 @@
         var chart = new google.visualization.LineChart(document.getElementById('graphdiv'));
         chart.draw(data, options);
         
-      }, 'jsonp');
+      }, 'json');
       
     }
   </script>
