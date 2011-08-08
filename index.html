@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Johnathan's Card - Visualizations</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+  <script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script>  
+    Date.prototype.setISO8601 = function (string) {
+        var regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" +
+            "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?" +
+            "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?";
+        var d = string.match(new RegExp(regexp));
+
+        var offset = 0;
+        var date = new Date(d[1], 0, 1);
+
+        if (d[3]) { date.setMonth(d[3] - 1); }
+        if (d[5]) { date.setDate(d[5]); }
+        if (d[7]) { date.setHours(d[7]); }
+        if (d[8]) { date.setMinutes(d[8]); }
+        if (d[10]) { date.setSeconds(d[10]); }
+        if (d[12]) { date.setMilliseconds(Number("0." + d[12]) * 1000); }
+        if (d[14]) {
+            offset = (Number(d[16]) * 60) + Number(d[17]);
+            offset *= ((d[15] == '-') ? 1 : -1);
+        }
+
+        offset -= date.getTimezoneOffset();
+        time = (Number(date) + (offset * 60 * 1000));
+        this.setTime(Number(time));
+    }
+    
+    google.load('visualization', '1', {'packages':['corechart']});
+    google.setOnLoadCallback(drawChart);
+    
+    function drawChart() {
+      data = new google.visualization.DataTable();
+      data.addColumn('datetime', 'Date');
+      data.addColumn('number', 'Dollars');
+      
+      $.get('http://jonathanstark.com/card/api/balances',function(result, textStatus, jqXHR) {
+        var balances = result.balances;
+        
+        balances = _.map(balances, function(transaction) {
+          var newDate = new Date();
+          newDate.setISO8601(transaction.created_at);
+          var nextItem = new Array(newDate , parseInt(transaction.amount));
+          //console.log(nextItem);
+          return nextItem;
+        });
+        
+        data.addRows(balances);
+        
+        var options = { 'title': "Jonathan's Card", 'width': 960, 'height': 600 };
+        
+        var chart = new google.visualization.LineChart(document.getElementById('graphdiv'));
+        chart.draw(data, options);
+        
+      }, 'json');
+      
+    }
+  </script>
+</head>
+<body>
+  <h1>Visualize the <a href="http://jonathanstark.com/card/">Jonathan's Card</a> Social Experiment</h1>
+  
+  <div id="graphdiv"></div>
+</body>
+</html>
