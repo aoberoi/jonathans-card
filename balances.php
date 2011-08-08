@@ -1,3 +1,5 @@
+<?php
+
 $request =  'http://jonathanstark.com/card/api/balances';
 $session = curl_init($request);
 curl_setopt($session, CURLOPT_HEADER, false);
